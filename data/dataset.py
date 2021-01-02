@@ -10,34 +10,35 @@ from torch.utils.data import Dataset
 
 
 class BoolQDataset(Dataset):
-    def __init__(self, passage_ids,question_ids,answers):
+    def __init__(self, passage_ids, question_ids, answers):
         self.passage_ids = passage_ids
         self.question_ids = question_ids
         self.answers = answers
 
-
     def __getitem__(self, index):
-        passage_ids = torch.Tensor(self.passage_ids[index],dtype=torch.long)
-        question_ids = torch.Tensor(self.question_ids[index],dtype=torch.long)
-        answer = torch.tensor(self.answers[index], dtype=torch.long)
-        return passage_ids,question_ids,answer
+        passage_ids =self.passage_ids[index]
+        question_ids =self.question_ids[index]
+        answer =self.answers[index]
+        return passage_ids, question_ids, answer
 
     def __len__(self):
         return len(self.answers)
 
+
 def encode_data(vocab, texts, max_length):
-    
+
     text_ids = []
 
     for text in tqdm(texts):
         words = nltk.word_tokenize(text.lower())
-        words.insert(0,'<STA>')
+        words.insert(0, '<STA>')
         words.append('<END>')
         ids = [vocab[word] if word in vocab else 1 for word in words[:max_length]]
 
         text_ids.append(ids)
 
     return np.array(text_ids)
+
 
 def get_train_data(data_path, train_data_file, vocab, max_seq_length):
     train_data_file = os.path.join(data_path, train_data_file)
@@ -55,6 +56,7 @@ def get_train_data(data_path, train_data_file, vocab, max_seq_length):
 
     return BoolQDataset(passages_ids_train, questions_ids_train, answers_train)
 
+
 def get_dev_data(data_path, dev_data_file, vocab, max_seq_length):
     dev_data_file = os.path.join(data_path, dev_data_file)
     dev_data_df = pd.read_json(dev_data_file, lines=True, orient='records')
@@ -71,7 +73,8 @@ def get_dev_data(data_path, dev_data_file, vocab, max_seq_length):
 
     return BoolQDataset(passages_ids_dev, questions_ids_dev, answers_dev)
 
-def pad_sequence(ids,max_length):
-    if len(ids) <max_length:
-        return np.concatenate((ids,np.zeros(max_length-len(ids)).astype(np.int64)))
+
+def pad_sequence(ids, max_length):
+    if len(ids) < max_length:
+        return np.concatenate((ids, np.zeros(max_length-len(ids)).astype(np.int64)))
     return ids

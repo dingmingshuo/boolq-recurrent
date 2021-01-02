@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+from torch.nn.parameter import Parameter
 
 
 class BiLSTM(nn.Module):
@@ -10,7 +11,7 @@ class BiLSTM(nn.Module):
 
     def forward(self, x, x_length):
         # x is a padded sequence with shape (batch_size, seq_len, input_size)
-        x = nn.utils.rnn.pack_padded_sequence(x, x_length, batch_first=True)
+        x = nn.utils.rnn.pack_padded_sequence(x, x_length, batch_first=True, enforce_sorted=False)
         x, _ = self.BiLSTM(x)
         x = nn.utils.rnn.pad_packed_sequence(x, batch_first=True)[0]
         # x is now a tensor with shape (batch_size, seq_len, 2 * hidden_size)
@@ -22,19 +23,22 @@ class Embed(nn.Module):
         super(Embed, self).__init__()
         self.embd = nn.Embedding(num_embeddings, embedding_dim)
         self.BiLSTM = BiLSTM(embedding_dim, hidden_size)
+        self.dropout = nn.Dropout(0.2)
 
     def forward(self, u, u_length):
         out = self.embd(u)
+        self.dropout(out)
         out = self.BiLSTM(out, u_length)
+        self.dropout(out)
         return out
 
 
 class CoAttention(nn.Module):
     def __init__(self, vec_len):
         super(CoAttention, self).__init__()
-        self.w1 = torch.ones((vec_len), requires_grad=True)
-        self.w2 = torch.ones((vec_len), requires_grad=True)
-        self.w3 = torch.ones((vec_len), requires_grad=True)
+        self.w1 = Parameter(torch.ones((vec_len), requires_grad=True))
+        self.w2 = Parameter(torch.ones((vec_len), requires_grad=True))
+        self.w3 = Parameter(torch.ones((vec_len), requires_grad=True))
 
     def forward(self, u, v):
         (batch_size, seq_lenu, vec_len) = u.shape
@@ -69,7 +73,7 @@ class Pool(nn.Module):
     def __init__(self, input_size, hidden_size):
         super(Pool, self).__init__()
         self.BiLSTMu = BiLSTM(input_size * 3, hidden_size)
-        self.wu = torch.ones((2 * hidden_size), requires_grad=True)
+        self.wu = Parameter(torch.ones((2 * hidden_size), requires_grad=True))
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, u, ut, u_mask, u_length):
@@ -98,10 +102,13 @@ class Classify(nn.Module):
         self.fc1 = nn.Linear(in_features * 2, in_features)
         self.fc2 = nn.Linear(in_features, class_num)
         self.softmax = nn.Softmax(dim=1)
+        self.dropout = nn.Dropout(0.2)
 
     def forward(self, u_star, v_star):
         fc_in = torch.cat((u_star, v_star), dim=1)
+        fc_in = self.dropout(fc_in)
         out = self.fc1(fc_in)
+        out = self.dropout(out)
         out = self.fc2(out)
         out = self.softmax(out)
         return out
