@@ -8,6 +8,7 @@ import pickle
 import torch
 import numpy as np
 from torch.utils.data import DataLoader
+from torch.nn.functional import softmax
 from torch.optim import Adam
 from tqdm import tqdm
 
@@ -101,8 +102,9 @@ with torch.no_grad():
         questions_mask = torch.tensor(questions_mask).long().to(device)
         labels = torch.tensor(labels).to(device)
 
-        results = model(passages_ids, questions_ids, passages_length,
-                        questions_length, passages_mask, questions_mask)
+        eval_outputs = model(passages_ids, questions_ids, passages_length,
+                        questions_length, passages_mask, questions_mask)        
+        results = softmax(eval_outputs, dim=1)
         now_pred = torch.argmax(results, dim=1)
         pred = np.concatenate((pred, now_pred.cpu().numpy()), axis=0)
         answer = np.concatenate((answer, labels.cpu().numpy()), axis=0)
