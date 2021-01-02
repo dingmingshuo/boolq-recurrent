@@ -1,5 +1,5 @@
 data:
-  data_path: /home/mingshuo/Dataset/BoolQ
+  data_path: F:\boolq\data
   train_data: train.jsonl
   dev_data: dev.jsonl
   test_data: test.jsonl
@@ -30,4 +30,5 @@ dev:
   batch_size: 8
 
 eval:
-  ckpt_path: ./result/lstm_epoch=1
+  ckpt_path: ./result/lstm_epoch=50
+  result_path: ./result/result.txt
