@@ -110,4 +110,5 @@ class Classify(nn.Module):
         out = self.fc1(fc_in)
         out = self.dropout(out)
         out = self.fc2(out)
+        out = self.softmax(out)
         return out
