@@ -19,12 +19,15 @@ model:
 train:
   output_dir: ./result
   output_filename_prefix: lstm
-  logging_step: 200
-  batch_size: 4
-  epochs: 10
+  logging_step: 1000
+  batch_size: 32
+  epochs: 50
   lr: 0.0005
   weight_decay: 0.001
   b: 0.3
 
 dev:
   batch_size: 8
+
+eval:
+  ckpt_path: ./result/lstm_epoch=1

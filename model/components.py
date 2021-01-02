@@ -4,7 +4,7 @@ from torch.nn.parameter import Parameter
 
 
 class BiLSTM(nn.Module):
-    def __init__(self, input_size, hidden_size, num_layers=2, dropout=0.2):
+    def __init__(self, input_size, hidden_size, num_layers=1, dropout=0.2):
         super(BiLSTM, self).__init__()
         self.BiLSTM = nn.LSTM(input_size, hidden_size, num_layers=num_layers,
                               batch_first=True, dropout=dropout, bidirectional=True)
@@ -36,9 +36,9 @@ class Embed(nn.Module):
 class CoAttention(nn.Module):
     def __init__(self, vec_len):
         super(CoAttention, self).__init__()
-        self.w1 = Parameter(torch.ones((vec_len), requires_grad=True))
-        self.w2 = Parameter(torch.ones((vec_len), requires_grad=True))
-        self.w3 = Parameter(torch.ones((vec_len), requires_grad=True))
+        self.w1 = Parameter(torch.randn((vec_len), requires_grad=True))
+        self.w2 = Parameter(torch.randn((vec_len), requires_grad=True))
+        self.w3 = Parameter(torch.randn((vec_len), requires_grad=True))
 
     def forward(self, u, v):
         (batch_size, seq_lenu, vec_len) = u.shape
@@ -73,7 +73,7 @@ class Pool(nn.Module):
     def __init__(self, input_size, hidden_size):
         super(Pool, self).__init__()
         self.BiLSTMu = BiLSTM(input_size * 3, hidden_size)
-        self.wu = Parameter(torch.ones((2 * hidden_size), requires_grad=True))
+        self.wu = Parameter(torch.randn((2 * hidden_size), requires_grad=True))
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, u, ut, u_mask, u_length):
@@ -110,5 +110,4 @@ class Classify(nn.Module):
         out = self.fc1(fc_in)
         out = self.dropout(out)
         out = self.fc2(out)
-        out = self.softmax(out)
         return out
