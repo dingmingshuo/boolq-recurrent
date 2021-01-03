@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 from torch.nn.parameter import Parameter
+from .glove import get_numpy_word_embed
 
 
 class BiLSTM(nn.Module):
@@ -21,6 +22,8 @@ class BiLSTM(nn.Module):
 class Embed(nn.Module):
     def __init__(self, num_embeddings, embedding_dim, hidden_size):
         super(Embed, self).__init__()
+        # numpy_embed = get_numpy_word_embed()
+        # self.embd = nn.Embedding(num_embeddings, embedding_dim).from_pretrained(torch.tensor(numpy_embed))
         self.embd = nn.Embedding(num_embeddings, embedding_dim)
         self.BiLSTM = BiLSTM(embedding_dim, hidden_size)
         self.dropout = nn.Dropout(0.2)

@@ -1,7 +1,7 @@
 data:
-  data_path: F:\boolq\data
+  data_path:  /home/mingshuo/Dataset/BoolQ
   train_data: train.jsonl
-  dev_data: dev.jsonl
+  dev_data: test.jsonl
   test_data: test.jsonl
   calc_file: ./data/calc.txt
   vocab_file: ./data/vocab.pickle
@@ -12,23 +12,25 @@ preprocess:
   qu_max_sent_len: 24
 
 model: 
-  embedding_dim: 200
+  glove_path: /home/mingshuo/Dataset/glove.6B.300d.txt
+  glove_length: 300
+  embedding_dim: 300
   hidden_size: 200
 
 
 train:
   output_dir: ./result
-  output_filename_prefix: lstm
-  logging_step: 1000
+  output_filename_prefix: lstm_dev
+  logging_step: 200
   batch_size: 32
-  epochs: 50
-  lr: 0.0005
+  epochs: 20
+  lr: 0.0001
   weight_decay: 0.001
   b: 0.3
 
 dev:
-  batch_size: 8
+  batch_size: 32
 
 eval:
-  ckpt_path: ./result/lstm_epoch=50
+  ckpt_path: ./result/lstm_dev_epoch=10_b=0.30000
   result_path: ./result/result.txt
