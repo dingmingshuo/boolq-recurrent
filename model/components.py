@@ -101,12 +101,10 @@ class Classify(nn.Module):
         super(Classify, self).__init__()
         self.fc1 = nn.Linear(in_features * 2, in_features)
         self.fc2 = nn.Linear(in_features, class_num)
-        self.softmax = nn.Softmax(dim=1)
         self.dropout = nn.Dropout(0.2)
 
     def forward(self, u_star, v_star):
         fc_in = torch.cat((u_star, v_star), dim=1)
-        fc_in = self.dropout(fc_in)
         out = self.fc1(fc_in)
         out = self.dropout(out)
         out = self.fc2(out)

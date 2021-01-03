@@ -81,6 +81,7 @@ print(model)
 
 optimizer = Adam(model.parameters(), train_cfg["lr"],
                  weight_decay=train_cfg["weight_decay"])
+lr_now = train_cfg["lr"]
 crossentropyloss = torch.nn.CrossEntropyLoss()
 
 train_loader = DataLoader(
@@ -100,6 +101,7 @@ dev_loader = DataLoader(
 logging_step = train_cfg["logging_step"]
 b = train_cfg["b"]
 
+step_total = 0
 for epoch in range(train_cfg["epochs"]):
     total_loss = 0
     step_now = 0
@@ -107,6 +109,7 @@ for epoch in range(train_cfg["epochs"]):
     with tqdm(train_loader) as tl:
         for passages_ids, questions_ids, passages_length, questions_length, passages_mask, questions_mask, answers in tl:
             step_now += 1
+            step_total += 1
             optimizer.zero_grad()
 
             passages_ids = torch.tensor(passages_ids).long().to(device)
@@ -156,9 +159,14 @@ for epoch in range(train_cfg["epochs"]):
                            avg_loss=total_loss/step_now,
                            dev_loss=dev_loss/len(dev_loader))
 
+            if step_total % 100  == 0:
+                lr_now *= 0.999
+                optimizer = Adam(model.parameters(), lr_now,
+                 weight_decay=train_cfg["weight_decay"])
+
     # Save model
     if not os.path.isdir(train_cfg["output_dir"]):
         os.mkdir(train_cfg["output_dir"])
     output_path = os.path.join(
         train_cfg["output_dir"], train_cfg["output_filename_prefix"])
-    torch.save(model.state_dict(), (output_path+"_epoch=%d") % (epoch+1))
+    torch.save(model.state_dict(), (output_path+"_epoch=%d_b=%.5f") % (epoch+1, b))

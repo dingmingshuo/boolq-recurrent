@@ -78,12 +78,10 @@ model = RecurrentModel(
 checkpoint = torch.load(eval_cfg['ckpt_path'], map_location=device)
 model.load_state_dict(checkpoint)
 model.eval()
-print(model)
 
 eval_loader = DataLoader(
     dev_data,
     batch_size=dev_cfg["batch_size"],
-    shuffle=True,
     collate_fn=collate_fn
 )
 
